@@ -11,8 +11,12 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include <iostream>
+#include <fstream>
 
 using namespace vex;
+using std::cout; using std::ofstream;
+using std::endl; using std::string;
 
 // A global instance of competition
 competition Competition;
@@ -37,6 +41,81 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 }
 
+// Autonomous Settings //
+int desiredValue = 0;
+int desiredTurnValue = 0;
+
+// PID Values //
+double kP = 0.0;         /////////////////////
+double kI = 0.0;     //        Requires
+double kD = 0.0;     //         Proper        
+double turnkP = 0.0; //         Tuning 
+double turnkD = 0.0;     /////////////////////
+
+int error;           // sensorValue - desiredValue (Position)
+int prevError = 0;   // Position 20ms ago
+int derivative;      // error - prevError (Speed)
+
+int turnError;           // sensorValue - desiredValue (Position)
+int turnPrevError = 0;   // Position 20ms ago
+int turnDerivative;      // error - prevError (Speed)
+
+bool resetEncoders = false;
+
+bool enableDrivePID = true;
+
+int drivePID() {
+  
+  while(enableDrivePID) {
+    
+    if (resetEncoders) {
+      resetEncoders = false;
+      leftMotorA.resetPosition();
+      leftMotorB.resetPosition();
+      rightMotorA.resetPosition();
+      rightMotorB.resetPosition();
+    }
+    
+    int leftApos = leftMotorA.position(degrees);          /////////////////////////
+    int leftBpos = leftMotorB.position(degrees);        //      Fetch positions   
+    int rightApos = rightMotorA.position(degrees);    //    of drivetrain motors
+    int rightBpos = rightMotorB.position(degrees);          /////////////////////////
+
+    /////////////////////////////////////////////////////// Lateral Movement PID /////////////////////////////////////////////////////////////
+    int avgPos = (leftApos + leftBpos + rightApos + rightBpos) / 4;  // Calculates average position of motors
+
+    error = avgPos - desiredValue;     // Potential
+    derivative = error - prevError;    // Derivative
+
+    double lateralMotorPower = error * kP + derivative * kD;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////////////////////////////// Turning Movement PID /////////////////////////////////////////////////////////////
+    int turnAvgPos = (leftApos + leftBpos + rightApos + rightBpos) / 4;  // Calculates average position of motors
+
+    turnError = turnAvgPos - desiredTurnValue;    // Potential
+    turnDerivative = turnError - turnPrevError;   // Derivative
+
+    double turnMotorPower = turnError * turnkP + turnDerivative * turnkD;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    leftMotorA.spin(vex::directionType::fwd, lateralMotorPower + turnMotorPower, voltageUnits::volt); 
+    leftMotorB.spin(vex::directionType::fwd, lateralMotorPower + turnMotorPower, voltageUnits::volt);
+    rightMotorA.spin(vex::directionType::fwd, lateralMotorPower - turnMotorPower, voltageUnits::volt);
+    rightMotorB.spin(vex::directionType::fwd, lateralMotorPower - turnMotorPower, voltageUnits::volt);
+
+    /* "prevError" is set to "error" and the program waits 20ms before running loop, when error is fetched again, 
+        meaning that "prevError" is set to the value "error" was 20ms ago. Same logic applies to "turnPrevError" and "turnError"  */
+    prevError = error;
+    turnPrevError = turnError;
+    vex::task::sleep(20);
+
+  }
+  
+  return 1;
+}
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*                              Autonomous Task                              */
@@ -48,9 +127,9 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  vex::task piddy(drivePID);
+
+  
 }
 
 /*---------------------------------------------------------------------------*/
