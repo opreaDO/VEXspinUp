@@ -11,6 +11,7 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include "ButtonClass.h"
 #include <iostream>
 #include <fstream>
 
@@ -36,9 +37,10 @@ competition Competition;
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+  
+  lcdButton auton1(50, 50, 100, 100, "Auton 1", "#FFFFFF", "#FFFFFF", 2);
+  lcdButton auton2(-50, 50, 100, 100, "Auton 1", "#FFFFFF", "#FFFFFF", 2);
+  
 }
 
 // Autonomous Settings //
@@ -158,7 +160,6 @@ void usercontrol(void) {
                     // prevent wasted resources.
   }
 }
-
 //
 // Main will set up the competition functions and callbacks.
 //

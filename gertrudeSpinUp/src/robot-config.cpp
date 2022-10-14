@@ -29,6 +29,13 @@ bool RemoteControlCodeEnabled = true;
 bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
+int flywheelCurrentSpeedLevel = 5; 
+double flywheelSpeedL1 = 20.0;
+double flywheelSpeedL2 = 40.0;
+double flywheelSpeedL3 = 60.0;
+double flywheelSpeedL4 = 80.0;
+double flywheelSpeedL5 = 100.0; 
+
 bool intakeAngleStopped = true;
 
 // define a task that will handle monitoring inputs from Controller1
@@ -111,6 +118,36 @@ int rc_auto_loop_function_Controller1() {
         intakeAngle.stop();
         intakeAngleStopped = true;
       }
+
+      if ((Controller1.ButtonDown.pressing()) && (flywheelCurrentSpeedLevel != 1)) {
+        flywheelCurrentSpeedLevel -= 1;
+      }
+      else if ((Controller1.ButtonUp.pressing()) && (flywheelCurrentSpeedLevel != 5)) {
+        flywheelCurrentSpeedLevel += 1;
+      }
+
+      if (flywheelCurrentSpeedLevel == 1) {
+        flywheel.setVelocity(flywheelSpeedL1, pct);
+        Controller1.Screen.clearScreen();
+        Controller1.Screen.print((flywheel.velocity(pct)));
+        if (flywheel.velocity(pct) == flywheelSpeedL1) {
+          Controller1.Screen.clearScreen();
+          Controller1.Screen.print("Full speed");
+        }
+      }
+      else if (flywheelCurrentSpeedLevel == 2) {
+        flywheel.setVelocity(flywheelSpeedL2, pct);
+      }
+      else if (flywheelCurrentSpeedLevel == 3) {
+        flywheel.setVelocity(flywheelSpeedL3, pct);
+      }
+      else if (flywheelCurrentSpeedLevel == 4) {
+        flywheel.setVelocity(flywheelSpeedL4, pct);
+      }
+      else if (flywheelCurrentSpeedLevel == 5) {
+        flywheel.setVelocity(flywheelSpeedL5, pct);
+      }
+
 
     }
     // wait before repeating the process
