@@ -6,6 +6,7 @@ using code = vision::code;
 
 // A global instance of brain used for printing to the V5 Brain screen
 brain  Brain;
+controller Controller1 = controller(primary);
 
 // VEXcode device constructors
 motor leftMotorA = motor(PORT1, ratio18_1, false);
@@ -15,12 +16,18 @@ motor rightMotorA = motor(PORT3, ratio18_1, true);
 motor rightMotorB = motor(PORT4, ratio18_1, true);
 motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
 drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 40, mm, 1);
+
 motor flywheelMotorA = motor(PORT6, ratio18_1, false);
 motor flywheelMotorB = motor(PORT7, ratio18_1, false);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
+
 motor intakeRoller = motor(PORT9, ratio18_1, false);
 motor intakeAngle = motor(PORT11, ratio18_1, false);
-controller Controller1 = controller(primary);
+
+encoder encoderA = encoder(Brain.ThreeWirePort.A);
+encoder encoderB = encoder(Brain.ThreeWirePort.B);
+encoder encoderC = encoder(Brain.ThreeWirePort.C);
+
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
@@ -29,12 +36,14 @@ bool RemoteControlCodeEnabled = true;
 bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
+// flywheel speed/control values
 int flywheelCurrentSpeedLevel = 5; 
 double flywheelSpeedL1 = 20.0;
 double flywheelSpeedL2 = 40.0;
 double flywheelSpeedL3 = 60.0;
 double flywheelSpeedL4 = 80.0;
 double flywheelSpeedL5 = 100.0; 
+double errorInterval = 0.5;
 
 bool intakeAngleStopped = true;
 
@@ -44,6 +53,10 @@ int rc_auto_loop_function_Controller1() {
   // update the motors based on the input values
   while(true) {
     if(RemoteControlCodeEnabled) {
+
+      //resets global timer to notify driver of key times 
+      Brain.resetTimer();
+
       // calculate the drivetrain motor velocities from the controller joystick axies
       // left = Axis3
       // right = Axis2
@@ -126,27 +139,68 @@ int rc_auto_loop_function_Controller1() {
         flywheelCurrentSpeedLevel += 1;
       }
 
+
+      // flywheel speed adjustments + displaying speed of flywheel on controller
       if (flywheelCurrentSpeedLevel == 1) {
         flywheel.setVelocity(flywheelSpeedL1, pct);
-        Controller1.Screen.clearScreen();
+        Controller1.Screen.setCursor(1, 1);
         Controller1.Screen.print((flywheel.velocity(pct)));
-        if (flywheel.velocity(pct) == flywheelSpeedL1) {
-          Controller1.Screen.clearScreen();
-          Controller1.Screen.print("Full speed");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval))   {
+          Controller1.Screen.setCursor(1, 2);
+          Controller1.Screen.print("Ready to Shoot");
+          Controller1.rumble(".");
         }
       }
       else if (flywheelCurrentSpeedLevel == 2) {
         flywheel.setVelocity(flywheelSpeedL2, pct);
+        Controller1.Screen.setCursor(1, 1);
+        Controller1.Screen.print((flywheel.velocity(pct)));
+        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL2 + errorInterval))   {
+          Controller1.Screen.setCursor(1, 2);
+          Controller1.Screen.print("Ready to Shoot");
+          Controller1.rumble(".");
+        }
       }
       else if (flywheelCurrentSpeedLevel == 3) {
         flywheel.setVelocity(flywheelSpeedL3, pct);
+        Controller1.Screen.setCursor(1, 1);
+        Controller1.Screen.print((flywheel.velocity(pct)));
+        if ((flywheel.velocity(pct) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL3 + errorInterval))   {
+          Controller1.Screen.setCursor(1, 2);
+          Controller1.Screen.print("Ready to Shoot");
+          Controller1.rumble(".");
+        }
+        
       }
       else if (flywheelCurrentSpeedLevel == 4) {
         flywheel.setVelocity(flywheelSpeedL4, pct);
+        Controller1.Screen.setCursor(1, 1);
+        Controller1.Screen.print((flywheel.velocity(pct)));
+        if ((flywheel.velocity(pct) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL4 + errorInterval))   {
+          Controller1.Screen.setCursor(1, 2);
+          Controller1.Screen.print("Ready to Shoot");
+          Controller1.rumble(".");
+        }
       }
       else if (flywheelCurrentSpeedLevel == 5) {
         flywheel.setVelocity(flywheelSpeedL5, pct);
+        Controller1.Screen.setCursor(1, 1);
+        Controller1.Screen.print((flywheel.velocity(pct)));
+        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval))   {
+          Controller1.Screen.setCursor(1, 2);
+          Controller1.Screen.print("Ready to Shoot");
+          Controller1.rumble(".");
+        }
       }
+
+      //when timer reaches 1:30, controller vibrates
+      if (Brain.timer(sec) == 90) {
+        // "." = short rumble, "-" = long rumble, " " = pause
+        Controller1.rumble("- -");
+      }
+
+      Controller1.Screen.setCursor(3, 1);
+      Controller1.Screen.print(105 - Brain.timer(sec));
 
 
     }
