@@ -43,9 +43,23 @@ double flywheelSpeedL2 = 40.0;
 double flywheelSpeedL3 = 60.0;
 double flywheelSpeedL4 = 80.0;
 double flywheelSpeedL5 = 100.0; 
-double errorInterval = 0.5;
+double errorInterval = 2;
+bool flywheelVibration = false;
 
 bool intakeAngleStopped = true;
+
+void controllerFlywheelReady() {
+  flywheelVibration = true;
+  Controller1.Screen.setCursor(1, 2);
+  Controller1.Screen.print("Ready to Shoot");
+  Controller1.rumble(".");
+}
+
+void ControllerFlywheelNotReady() {
+  flywheelVibration = false;
+  Controller1.Screen.setCursor(1, 2);
+  Controller1.Screen.clearLine();
+}
 
 // define a task that will handle monitoring inputs from Controller1
 int rc_auto_loop_function_Controller1() {
@@ -140,58 +154,60 @@ int rc_auto_loop_function_Controller1() {
       }
 
 
-      // flywheel speed adjustments + displaying speed of flywheel on controller
+      // flywheel speed adjustments + vibration
       if (flywheelCurrentSpeedLevel == 1) {
         flywheel.setVelocity(flywheelSpeedL1, pct);
-        Controller1.Screen.setCursor(1, 1);
-        Controller1.Screen.print((flywheel.velocity(pct)));
-        if ((flywheel.velocity(pct) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval))   {
-          Controller1.Screen.setCursor(1, 2);
-          Controller1.Screen.print("Ready to Shoot");
-          Controller1.rumble(".");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval) && (flywheelVibration == false))   {
+          controllerFlywheelReady();
+        }
+        else if ((flywheel.velocity(pct) <= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL1 + errorInterval) && (flywheelVibration == true))   {
+          ControllerFlywheelNotReady();
         }
       }
+
       else if (flywheelCurrentSpeedLevel == 2) {
         flywheel.setVelocity(flywheelSpeedL2, pct);
-        Controller1.Screen.setCursor(1, 1);
-        Controller1.Screen.print((flywheel.velocity(pct)));
-        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL2 + errorInterval))   {
-          Controller1.Screen.setCursor(1, 2);
-          Controller1.Screen.print("Ready to Shoot");
-          Controller1.rumble(".");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL2 + errorInterval) && (flywheelVibration == false))   {
+          controllerFlywheelReady();
+        }
+        else if ((flywheel.velocity(pct) <= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL2 + errorInterval) && (flywheelVibration == true))   {
+          ControllerFlywheelNotReady();
         }
       }
+
       else if (flywheelCurrentSpeedLevel == 3) {
         flywheel.setVelocity(flywheelSpeedL3, pct);
-        Controller1.Screen.setCursor(1, 1);
-        Controller1.Screen.print((flywheel.velocity(pct)));
-        if ((flywheel.velocity(pct) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL3 + errorInterval))   {
-          Controller1.Screen.setCursor(1, 2);
-          Controller1.Screen.print("Ready to Shoot");
-          Controller1.rumble(".");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL3 + errorInterval) && (flywheelVibration == false))   {
+          controllerFlywheelReady();
         }
-        
+        else if ((flywheel.velocity(pct) <= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL3 + errorInterval) && (flywheelVibration == true))   {
+          ControllerFlywheelNotReady();
+        }
       }
+
       else if (flywheelCurrentSpeedLevel == 4) {
         flywheel.setVelocity(flywheelSpeedL4, pct);
-        Controller1.Screen.setCursor(1, 1);
-        Controller1.Screen.print((flywheel.velocity(pct)));
-        if ((flywheel.velocity(pct) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL4 + errorInterval))   {
-          Controller1.Screen.setCursor(1, 2);
-          Controller1.Screen.print("Ready to Shoot");
-          Controller1.rumble(".");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL4 + errorInterval) && (flywheelVibration == false))   {
+          controllerFlywheelReady();
+        }
+        else if ((flywheel.velocity(pct) <= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL4 + errorInterval) && (flywheelVibration == true))   {
+          ControllerFlywheelNotReady();
         }
       }
+
       else if (flywheelCurrentSpeedLevel == 5) {
         flywheel.setVelocity(flywheelSpeedL5, pct);
-        Controller1.Screen.setCursor(1, 1);
-        Controller1.Screen.print((flywheel.velocity(pct)));
-        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval))   {
-          Controller1.Screen.setCursor(1, 2);
-          Controller1.Screen.print("Ready to Shoot");
-          Controller1.rumble(".");
+        if ((flywheel.velocity(pct) >= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL5 + errorInterval) && (flywheelVibration == false))   {
+          controllerFlywheelReady();
+        }
+        else if ((flywheel.velocity(pct) <= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL5 + errorInterval) && (flywheelVibration == true))   {
+          ControllerFlywheelNotReady();
         }
       }
+
+      //display speed of flywheel on controller
+      Controller1.Screen.setCursor(1, 1);
+      Controller1.Screen.print((flywheel.velocity(pct)));
 
       //when timer reaches 1:30, controller vibrates
       if (Brain.timer(sec) == 90) {
@@ -199,6 +215,8 @@ int rc_auto_loop_function_Controller1() {
         Controller1.rumble("- -");
       }
 
+
+      //displays time left in game
       Controller1.Screen.setCursor(3, 1);
       Controller1.Screen.print(105 - Brain.timer(sec));
 
