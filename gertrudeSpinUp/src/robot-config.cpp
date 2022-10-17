@@ -18,7 +18,7 @@ motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
 drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 40, mm, 1);
 
 motor flywheelMotorA = motor(PORT6, ratio18_1, false);
-motor flywheelMotorB = motor(PORT7, ratio18_1, false);
+motor flywheelMotorB = motor(PORT7, ratio18_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
 motor intakeRoller = motor(PORT9, ratio18_1, false);
@@ -37,9 +37,9 @@ bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
 // flywheel speed/control values
-int flywheelCurrentSpeedLevel = 5; 
-double flywheelSpeedL1 = 20.0;
-double flywheelSpeedL2 = 40.0;
+int flywheelCurrentSpeedLevel = 1; 
+double flywheelSpeedL1 = 25.0;
+double flywheelSpeedL2 = 45.0;
 double flywheelSpeedL3 = 60.0;
 double flywheelSpeedL4 = 80.0;
 double flywheelSpeedL5 = 100.0; 
@@ -47,6 +47,9 @@ double errorInterval = 2;
 bool flywheelVibration = false;
 
 bool intakeAngleStopped = true;
+
+bool timerReset = false;
+bool timerVibration = false;
 
 void controllerFlywheelReady() {
   flywheelVibration = true;
@@ -69,7 +72,10 @@ int rc_auto_loop_function_Controller1() {
     if(RemoteControlCodeEnabled) {
 
       //resets global timer to notify driver of key times 
-      Brain.resetTimer();
+      if (timerReset == true) {
+        Brain.resetTimer();
+        timerReset = true;
+      }
 
       // calculate the drivetrain motor velocities from the controller joystick axies
       // left = Axis3
@@ -207,12 +213,13 @@ int rc_auto_loop_function_Controller1() {
 
       //display speed of flywheel on controller
       Controller1.Screen.setCursor(1, 1);
-      Controller1.Screen.print((flywheel.velocity(pct)));
+      Controller1.Screen.print(Brain.timer(sec));
 
       //when timer reaches 1:30, controller vibrates
-      if (Brain.timer(sec) == 90) {
+      if ((Brain.timer(sec) > 89.5) && (Brain.timer(sec) < 90.5) && (timerVibration == false)){
         // "." = short rumble, "-" = long rumble, " " = pause
-        Controller1.rumble("- -");
+        Controller1.rumble("-");
+        timerVibration = true;
       }
 
 
