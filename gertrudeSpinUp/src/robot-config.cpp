@@ -263,6 +263,9 @@ int rc_auto_loop_function_Controller1() {
           roller.spin(forward);
         }
         else if ((opticalSensor.hue() <= 90) && (opticalSensor.hue() >= 0) && (rollerSpinningDone == false)) {
+          if (!rollerSpinningDone) {
+            roller.stop();
+          }
           rollerSpinningDone = true;
           roller.spinFor(forward, 0.5, sec);
         }
