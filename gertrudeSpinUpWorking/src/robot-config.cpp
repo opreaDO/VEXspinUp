@@ -17,8 +17,8 @@ motor rightMotorB = motor(PORT4, ratio18_1, true);
 motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
 drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 40, mm, 1);
 
-motor flywheelMotorA = motor(PORT6, ratio6_1, false);
-motor flywheelMotorB = motor(PORT7, ratio6_1, true);
+motor flywheelMotorA = motor(PORT14, ratio6_1, false);
+motor flywheelMotorB = motor(PORT15, ratio6_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
 motor intake = motor(PORT9, ratio18_1, false);
@@ -31,7 +31,7 @@ encoder encoderA = encoder(Brain.ThreeWirePort.A);
 encoder encoderB = encoder(Brain.ThreeWirePort.B);
 encoder encoderC = encoder(Brain.ThreeWirePort.C);
 
-optical opticalSensor = optical(PORT13, false);
+optical opticalSensor = optical(PORT11, false);
 
 
 // VEXcode generated functions
@@ -242,17 +242,17 @@ int rc_auto_loop_function_Controller1() {
 
       if (Controller1.ButtonLeft.pressing()) {
         if (drivetrainReversed == false) {
-          leftMotorA.setReversed(true);
-          leftMotorB.setReversed(true);
-          rightMotorA.setReversed(false);
-          rightMotorB.setReversed(false);
+          motor leftMotorA = motor(PORT2, ratio18_1, false);
+          motor leftMotorB = motor(PORT1, ratio18_1, false);
+          motor rightMotorA = motor(PORT4, ratio18_1, true);
+          motor rightMotorB = motor(PORT3, ratio18_1, true);
           drivetrainReversed = true;
         }
         else if (drivetrainReversed == true) {
-          leftMotorA.setReversed(false);
-          leftMotorB.setReversed(false);
-          rightMotorA.setReversed(true);
-          rightMotorB.setReversed(true);
+          motor leftMotorA = motor(PORT1, ratio18_1, false);
+          motor leftMotorB = motor(PORT2, ratio18_1, false);
+          motor rightMotorA = motor(PORT3, ratio18_1, true);
+          motor rightMotorB = motor(PORT4, ratio18_1, true);
           drivetrainReversed = false;
         }
       }
@@ -263,10 +263,10 @@ int rc_auto_loop_function_Controller1() {
       }
       else if ((opticalSensor.hue() <= 90) && (opticalSensor.hue() >= 0) && (opticalSensor.isNearObject())) {
         if (rollerSpinningDone == false) {
+          roller.spinFor(forward, 0.5, sec);
           roller.stop();
         }
         rollerSpinningDone = true;
-        roller.spinFor(forward, 0.5, sec);
       }
       
 
