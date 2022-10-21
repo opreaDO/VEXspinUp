@@ -21,7 +21,7 @@ motor flywheelMotorA = motor(PORT14, ratio6_1, false);
 motor flywheelMotorB = motor(PORT15, ratio6_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
-motor intake = motor(PORT20, ratio18_1, false);
+motor intake = motor(PORT20, ratio18_1, true);
 motor roller = motor(PORT12, ratio36_1, false);
 // motor intakeAngle = motor(PORT11, ratio18_1, false);
 
@@ -176,6 +176,7 @@ int rc_auto_loop_function_Controller1() {
         else if (pneumaticsOpen == true) {
           poomatics.close();
           pneumaticsOpen = false;
+        }
       }
 
       //display speed of flywheel on controller
@@ -190,14 +191,15 @@ int rc_auto_loop_function_Controller1() {
         if (rollerSpinningDone == false) {
           roller.spinFor(reverse, 0.5, sec);
           roller.stop();
+          rollerSpinningDone = true;
         }
-        rollerSpinningDone = true;
       }
       
 
+      
     }
-  }
-}   
+  }   
+}
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
