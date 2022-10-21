@@ -1,0 +1,4 @@
+# VEXspinUp
+Code for VRC 2022-23
+
+GERTRUDE IS GOD
