@@ -38,7 +38,6 @@ void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
   Controller1.Screen.clearScreen();
-  intake.setVelocity(100, pct);
 }
 
 // timer settings

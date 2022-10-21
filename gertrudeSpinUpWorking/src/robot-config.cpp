@@ -48,7 +48,6 @@ double flywheelSpeedL2 = 6;
 double flywheelSpeedL3 = 8;
 double flywheelSpeedL4 = 10;
 double flywheelSpeedL5 = 12; 
-double errorInterval = 20;
 bool flywheelVibration = false;
 
 bool flywheelRunning = false;
@@ -56,24 +55,10 @@ bool intakeRunning = false;
 
 bool intakeAngleStopped = true;
 
-bool drivetrainReversed = false;
-
 bool rollerSpinningDone = false;
 
+bool pneumaticsOpen = false;
 
-
-void controllerFlywheelReady() {
-  flywheelVibration = true;
-  Controller1.Screen.setCursor(1, 2);
-  Controller1.Screen.print("Ready to Shoot");
-  Controller1.rumble(".");
-}
-
-void ControllerFlywheelNotReady() {
-  flywheelVibration = false;
-  Controller1.Screen.setCursor(1, 2);
-  Controller1.Screen.clearLine();
-}
 
 // define a task that will handle monitoring inputs from Controller1
 int rc_auto_loop_function_Controller1() {
@@ -127,6 +112,17 @@ int rc_auto_loop_function_Controller1() {
         RightDriveSmart.spin(forward);
       }
 
+
+
+      // flywheel speed level controls
+      if ((Controller1.ButtonDown.pressing()) && (flywheelCurrentSpeedLevel != 1)) {
+        flywheelCurrentSpeedLevel -= 1;
+      }
+      else if ((Controller1.ButtonRight.pressing()) && (flywheelCurrentSpeedLevel != 5)) {
+        flywheelCurrentSpeedLevel += 1;
+      }
+
+
       // flywheel controls
       if (Controller1.ButtonL1.pressing()) {
         flywheel.spin(forward, 0, rpm);
@@ -152,17 +148,10 @@ int rc_auto_loop_function_Controller1() {
 
       // intake/roller controls
       if (Controller1.ButtonR1.pressing()) {
-        intake.spin(reverse);
+        intake.stop();
       }
       else if (Controller1.ButtonR2.pressing()) {
-        if (!intakeRunning) {
-          intake.spin(forward);
-          intakeRunning = true;
-        }
-        else if (intakeRunning) {
-          intake.stop();
-          intakeRunning = false;
-        }
+        intake.spin(forward, 100, pct);
       }
 
       // intake angle controls
@@ -180,84 +169,18 @@ int rc_auto_loop_function_Controller1() {
       // }
 
       if (Controller1.ButtonX.pressing()) {
-        poomatics.open();
-        poomatics.close();
-      }
-
-      if ((Controller1.ButtonDown.pressing()) && (flywheelCurrentSpeedLevel != 1)) {
-        flywheelCurrentSpeedLevel -= 1;
-      }
-      else if ((Controller1.ButtonRight.pressing()) && (flywheelCurrentSpeedLevel != 5)) {
-        flywheelCurrentSpeedLevel += 1;
-      }
-
-
-      // flywheel speed adjustments + vibration
-      if (flywheelCurrentSpeedLevel == 1) {
-        if ((flywheel.velocity(rpm) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL1 + errorInterval) && (flywheelVibration == false))   {
-          controllerFlywheelReady();
-        }
-        else if ((flywheel.velocity(rpm) <= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL1 + errorInterval) && (flywheelVibration == true))   {
-          ControllerFlywheelNotReady();
-        }
-      }
-
-      else if (flywheelCurrentSpeedLevel == 2) {
-        if ((flywheel.velocity(rpm) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL2 + errorInterval) && (flywheelVibration == false))   {
-          controllerFlywheelReady();
-        }
-        else if ((flywheel.velocity(rpm) <= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL2 + errorInterval) && (flywheelVibration == true))   {
-          ControllerFlywheelNotReady();
-        }
-      }
-
-      else if (flywheelCurrentSpeedLevel == 3) {
-        if ((flywheel.velocity(rpm) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL3 + errorInterval) && (flywheelVibration == false))   {
-          controllerFlywheelReady();
-        }
-        else if ((flywheel.velocity(rpm) <= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL3 + errorInterval) && (flywheelVibration == true))   {
-          ControllerFlywheelNotReady();
-        }
-      }
-
-      else if (flywheelCurrentSpeedLevel == 4) {
-        if ((flywheel.velocity(rpm) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL4 + errorInterval) && (flywheelVibration == false))   {
-          controllerFlywheelReady();
-        }
-        else if ((flywheel.velocity(rpm) <= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL4 + errorInterval) && (flywheelVibration == true))   {
-          ControllerFlywheelNotReady();
-        }
-      }
-
-      else if (flywheelCurrentSpeedLevel == 5) {
-        if ((flywheel.velocity(rpm) >= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL5 + errorInterval) && (flywheelVibration == false))   {
-          controllerFlywheelReady();
-        }
-        else if ((flywheel.velocity(rpm) <= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL5 + errorInterval) && (flywheelVibration == true))   {
-          ControllerFlywheelNotReady();
-        }
+        if (pneumaticsOpen == false) {
+          poomatics.open();
+          pneumaticsOpen = true;
+        } 
+        else if (pneumaticsOpen == true) {
+          poomatics.close();
+          pneumaticsOpen = false;
       }
 
       //display speed of flywheel on controller
       Controller1.Screen.setCursor(1, 1);
       Controller1.Screen.print(flywheel.velocity(rpm));
-
-      if (Controller1.ButtonLeft.pressing()) {
-        if (drivetrainReversed == false) {
-          motor leftMotorA = motor(PORT2, ratio18_1, false);
-          motor leftMotorB = motor(PORT1, ratio18_1, false);
-          motor rightMotorA = motor(PORT4, ratio18_1, true);
-          motor rightMotorB = motor(PORT3, ratio18_1, true);
-          drivetrainReversed = true;
-        }
-        else if (drivetrainReversed == true) {
-          motor leftMotorA = motor(PORT1, ratio18_1, false);
-          motor leftMotorB = motor(PORT2, ratio18_1, false);
-          motor rightMotorA = motor(PORT3, ratio18_1, true);
-          motor rightMotorB = motor(PORT4, ratio18_1, true);
-          drivetrainReversed = false;
-        }
-      }
     
       if ((opticalSensor.hue() <= 255) && (opticalSensor.hue() >= 120) && (opticalSensor.isNearObject())) {
         rollerSpinningDone = false;
