@@ -21,7 +21,7 @@ motor flywheelMotorA = motor(PORT14, ratio6_1, false);
 motor flywheelMotorB = motor(PORT15, ratio6_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
-motor intake = motor(PORT20, ratio18_1, true);
+motor intake = motor(PORT20, ratio18_1, false);
 motor roller = motor(PORT12, ratio36_1, false);
 // motor intakeAngle = motor(PORT11, ratio18_1, false);
 
@@ -42,7 +42,7 @@ bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
 // flywheel speed/control values
-int flywheelCurrentSpeedLevel = 1; 
+int flywheelCurrentSpeedLevel = 2; 
 double flywheelSpeedL1 = 4;
 double flywheelSpeedL2 = 6;
 double flywheelSpeedL3 = 8;
