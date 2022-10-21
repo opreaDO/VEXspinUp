@@ -17,16 +17,21 @@ motor rightMotorB = motor(PORT4, ratio18_1, true);
 motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
 drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 40, mm, 1);
 
-motor flywheelMotorA = motor(PORT6, ratio18_1, false);
-motor flywheelMotorB = motor(PORT7, ratio18_1, true);
+motor flywheelMotorA = motor(PORT6, ratio6_1, false);
+motor flywheelMotorB = motor(PORT7, ratio6_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
-motor intakeRoller = motor(PORT9, ratio18_1, false);
-motor intakeAngle = motor(PORT11, ratio18_1, false);
+motor intake = motor(PORT9, ratio18_1, false);
+motor roller = motor(PORT12, ratio36_1, false);
+// motor intakeAngle = motor(PORT11, ratio18_1, false);
+
+pneumatics poomatics = pneumatics(Brain.ThreeWirePort.D);
 
 encoder encoderA = encoder(Brain.ThreeWirePort.A);
 encoder encoderB = encoder(Brain.ThreeWirePort.B);
 encoder encoderC = encoder(Brain.ThreeWirePort.C);
+
+optical opticalSensor = optical(PORT13, false);
 
 
 // VEXcode generated functions
@@ -38,18 +43,22 @@ bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
 // flywheel speed/control values
 int flywheelCurrentSpeedLevel = 1; 
-double flywheelSpeedL1 = 25.0;
-double flywheelSpeedL2 = 45.0;
-double flywheelSpeedL3 = 60.0;
-double flywheelSpeedL4 = 80.0;
-double flywheelSpeedL5 = 100.0; 
-double errorInterval = 2;
+double flywheelSpeedL1 = 4;
+double flywheelSpeedL2 = 6;
+double flywheelSpeedL3 = 8;
+double flywheelSpeedL4 = 10;
+double flywheelSpeedL5 = 12; 
+double errorInterval = 20;
 bool flywheelVibration = false;
+
+bool flywheelRunning = false;
+bool intakeRunning = false;
 
 bool intakeAngleStopped = true;
 
-bool timerReset = false;
-bool timerVibration = false;
+bool drivetrainReversed = false;
+
+bool rollerSpinningDone = false;
 
 void controllerFlywheelReady() {
   flywheelVibration = true;
@@ -70,13 +79,6 @@ int rc_auto_loop_function_Controller1() {
   // update the motors based on the input values
   while(true) {
     if(RemoteControlCodeEnabled) {
-
-      //resets global timer to notify driver of key times 
-      if (timerReset == true) {
-        Brain.resetTimer();
-        timerReset = true;
-      }
-
       // calculate the drivetrain motor velocities from the controller joystick axies
       // left = Axis3
       // right = Axis2
@@ -92,7 +94,8 @@ int rc_auto_loop_function_Controller1() {
           // tell the code that the left motor has been stopped
           DrivetrainLNeedsToBeStopped_Controller1 = false;
         }
-      } else {
+      } 
+      else {
         // reset the toggle so that the deadband code knows to stop the left motor nexttime the input is in the deadband range
         DrivetrainLNeedsToBeStopped_Controller1 = true;
       }
@@ -105,7 +108,8 @@ int rc_auto_loop_function_Controller1() {
           // tell the code that the right motor has been stopped
           DrivetrainRNeedsToBeStopped_Controller1 = false;
         }
-      } else {
+      } 
+      else {
         // reset the toggle so that the deadband code knows to stop the right motor next time the input is in the deadband range
         DrivetrainRNeedsToBeStopped_Controller1 = true;
       }
@@ -123,117 +127,150 @@ int rc_auto_loop_function_Controller1() {
 
       // flywheel controls
       if (Controller1.ButtonL1.pressing()) {
-        flywheel.spin(forward);
+        flywheel.spin(forward, 0, rpm);
       }
       else if (Controller1.ButtonL2.pressing()) {
-        flywheel.stop();
+        if (flywheelCurrentSpeedLevel == 1){
+          flywheel.spin(forward, flywheelSpeedL1, volt);
+        }
+        else if (flywheelCurrentSpeedLevel == 2) {
+          flywheel.spin(forward, flywheelSpeedL2, volt);
+        }
+        else if (flywheelCurrentSpeedLevel == 3) {
+          flywheel.spin(forward, flywheelSpeedL3, volt);
+        }
+        else if (flywheelCurrentSpeedLevel == 4) {
+          flywheel.spin(forward, flywheelSpeedL4, volt);
+        }
+        else if (flywheelCurrentSpeedLevel == 5) {
+          flywheel.spin(forward, flywheelSpeedL5, volt);
+        }
       }
+      
 
       // intake/roller controls
       if (Controller1.ButtonR1.pressing()) {
-        intakeRoller.spin(forward);
-
+        intake.spin(reverse);
       }
       else if (Controller1.ButtonR2.pressing()) {
-        intakeRoller.stop();
+        if (!intakeRunning) {
+          intake.spin(forward);
+          intakeRunning = true;
+        }
+        else if (intakeRunning) {
+          intake.stop();
+          intakeRunning = false;
+        }
       }
 
       // intake angle controls
-      if (Controller1.ButtonA.pressing()) {
-        intakeAngle.spin(forward);
-        intakeAngleStopped = false;
-      }
-      else if (Controller1.ButtonB.pressing()) {
-        intakeAngle.spin(reverse);
-        intakeAngleStopped = false;
-      }
-      else if (!intakeAngleStopped) {
-        intakeAngle.stop();
-        intakeAngleStopped = true;
+      // if (Controller1.ButtonA.pressing()) {
+        // intakeAngle.spin(forward);
+        // intakeAngleStopped = false;
+      // }
+      // else if (Controller1.ButtonB.pressing()) {
+        // intakeAngle.spin(reverse);
+        // intakeAngleStopped = false;
+      // }
+      // else if (!intakeAngleStopped) {
+        // intakeAngle.stop();
+        // intakeAngleStopped = true;
+      // }
+
+      if (Controller1.ButtonX.pressing()) {
+        poomatics.open();
+        poomatics.close();
       }
 
       if ((Controller1.ButtonDown.pressing()) && (flywheelCurrentSpeedLevel != 1)) {
         flywheelCurrentSpeedLevel -= 1;
       }
-      else if ((Controller1.ButtonUp.pressing()) && (flywheelCurrentSpeedLevel != 5)) {
+      else if ((Controller1.ButtonRight.pressing()) && (flywheelCurrentSpeedLevel != 5)) {
         flywheelCurrentSpeedLevel += 1;
       }
 
 
       // flywheel speed adjustments + vibration
       if (flywheelCurrentSpeedLevel == 1) {
-        flywheel.setVelocity(flywheelSpeedL1, pct);
-        if ((flywheel.velocity(pct) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL1 + errorInterval) && (flywheelVibration == false))   {
+        if ((flywheel.velocity(rpm) >= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL1 + errorInterval) && (flywheelVibration == false))   {
           controllerFlywheelReady();
         }
-        else if ((flywheel.velocity(pct) <= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL1 + errorInterval) && (flywheelVibration == true))   {
+        else if ((flywheel.velocity(rpm) <= flywheelSpeedL1 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL1 + errorInterval) && (flywheelVibration == true))   {
           ControllerFlywheelNotReady();
         }
       }
 
       else if (flywheelCurrentSpeedLevel == 2) {
-        flywheel.setVelocity(flywheelSpeedL2, pct);
-        if ((flywheel.velocity(pct) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL2 + errorInterval) && (flywheelVibration == false))   {
+        if ((flywheel.velocity(rpm) >= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL2 + errorInterval) && (flywheelVibration == false))   {
           controllerFlywheelReady();
         }
-        else if ((flywheel.velocity(pct) <= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL2 + errorInterval) && (flywheelVibration == true))   {
+        else if ((flywheel.velocity(rpm) <= flywheelSpeedL2 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL2 + errorInterval) && (flywheelVibration == true))   {
           ControllerFlywheelNotReady();
         }
       }
 
       else if (flywheelCurrentSpeedLevel == 3) {
-        flywheel.setVelocity(flywheelSpeedL3, pct);
-        if ((flywheel.velocity(pct) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL3 + errorInterval) && (flywheelVibration == false))   {
+        if ((flywheel.velocity(rpm) >= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL3 + errorInterval) && (flywheelVibration == false))   {
           controllerFlywheelReady();
         }
-        else if ((flywheel.velocity(pct) <= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL3 + errorInterval) && (flywheelVibration == true))   {
+        else if ((flywheel.velocity(rpm) <= flywheelSpeedL3 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL3 + errorInterval) && (flywheelVibration == true))   {
           ControllerFlywheelNotReady();
         }
       }
 
       else if (flywheelCurrentSpeedLevel == 4) {
-        flywheel.setVelocity(flywheelSpeedL4, pct);
-        if ((flywheel.velocity(pct) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL4 + errorInterval) && (flywheelVibration == false))   {
+        if ((flywheel.velocity(rpm) >= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL4 + errorInterval) && (flywheelVibration == false))   {
           controllerFlywheelReady();
         }
-        else if ((flywheel.velocity(pct) <= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL4 + errorInterval) && (flywheelVibration == true))   {
+        else if ((flywheel.velocity(rpm) <= flywheelSpeedL4 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL4 + errorInterval) && (flywheelVibration == true))   {
           ControllerFlywheelNotReady();
         }
       }
 
       else if (flywheelCurrentSpeedLevel == 5) {
-        flywheel.setVelocity(flywheelSpeedL5, pct);
-        if ((flywheel.velocity(pct) >= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(pct) <= flywheelSpeedL5 + errorInterval) && (flywheelVibration == false))   {
+        if ((flywheel.velocity(rpm) >= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(rpm) <= flywheelSpeedL5 + errorInterval) && (flywheelVibration == false))   {
           controllerFlywheelReady();
         }
-        else if ((flywheel.velocity(pct) <= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(pct) >= flywheelSpeedL5 + errorInterval) && (flywheelVibration == true))   {
+        else if ((flywheel.velocity(rpm) <= flywheelSpeedL5 - errorInterval) && (flywheel.velocity(rpm) >= flywheelSpeedL5 + errorInterval) && (flywheelVibration == true))   {
           ControllerFlywheelNotReady();
         }
       }
 
       //display speed of flywheel on controller
       Controller1.Screen.setCursor(1, 1);
-      Controller1.Screen.print(Brain.timer(sec));
+      Controller1.Screen.print(flywheel.velocity(rpm));
 
-      //when timer reaches 1:30, controller vibrates
-      if ((Brain.timer(sec) > 89.5) && (Brain.timer(sec) < 90.5) && (timerVibration == false)){
-        // "." = short rumble, "-" = long rumble, " " = pause
-        Controller1.rumble("-");
-        timerVibration = true;
+      if (Controller1.ButtonLeft.pressing()) {
+        if (drivetrainReversed == false) {
+          leftMotorA.setReversed(true);
+          leftMotorB.setReversed(true);
+          rightMotorA.setReversed(false);
+          rightMotorB.setReversed(false);
+          drivetrainReversed = true;
+        }
+        else if (drivetrainReversed == true) {
+          leftMotorA.setReversed(false);
+          leftMotorB.setReversed(false);
+          rightMotorA.setReversed(true);
+          rightMotorB.setReversed(true);
+          drivetrainReversed = false;
+        }
+      }
+    
+      if ((opticalSensor.hue() <= 255) && (opticalSensor.hue() >= 120) && (opticalSensor.isNearObject())) {
+        rollerSpinningDone = false;
+        if (!(opticalSensor.hue() <= 90) && (opticalSensor.hue() >= 0) && (rollerSpinningDone == false)) {
+          roller.spin(forward);
+        }
+        else if ((opticalSensor.hue() <= 90) && (opticalSensor.hue() >= 0) && (rollerSpinningDone == false)) {
+          rollerSpinningDone = true;
+          roller.spinFor(forward, 0.5, sec);
+        }
       }
 
-
-      //displays time left in game
-      Controller1.Screen.setCursor(3, 1);
-      Controller1.Screen.print(105 - Brain.timer(sec));
-
-
     }
-    // wait before repeating the process
-    wait(20, msec);
   }
-  return 0;
-}
+}   
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

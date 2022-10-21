@@ -19,6 +19,8 @@ extern motor_group flywheel;
 extern motor intakeRoller;
 extern motor intakeAngle;
 
+extern pneumatics poomatics;
+
 extern encoder encoderA;
 extern encoder encoderB;
 extern encoder encoderC;

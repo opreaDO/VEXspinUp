@@ -37,11 +37,12 @@ competition Competition;
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  
-  lcdButton auton1(50, 50, 100, 100, "Auton 1", "#FFFFFF", "#FFFFFF", 2);
-  lcdButton auton2(-50, 50, 100, 100, "Auton 1", "#FFFFFF", "#FFFFFF", 2);
-  
+  Controller1.Screen.clearScreen();
 }
+
+// timer settings
+bool timerReset = false;
+bool timerVibration = false;
 
 // Autonomous Settings //
 int desiredValue = 0;
@@ -79,9 +80,9 @@ int drivePID() {
     }
     
     int leftApos = leftMotorA.position(degrees);          /////////////////////////
-    int leftBpos = leftMotorB.position(degrees);        //      Fetch positions   
-    int rightApos = rightMotorA.position(degrees);    //    of drivetrain motors
-    int rightBpos = rightMotorB.position(degrees);          /////////////////////////
+    int leftBpos = leftMotorB.position(degrees);        //     Fetch positions   
+    int rightApos = rightMotorA.position(degrees);     //    of drivetrain motors
+    int rightBpos = rightMotorB.position(degrees);       /////////////////////////
 
     /////////////////////////////////////////////////////// Lateral Movement PID /////////////////////////////////////////////////////////////
     int avgPos = (leftApos + leftBpos + rightApos + rightBpos) / 4;  // Calculates average position of motors
@@ -147,17 +148,27 @@ void autonomous(void) {
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
+    //resets global timer to notify driver of key times 
+    if (timerReset == true) {
+      Brain.resetTimer();
+      timerReset = true;
+    }
 
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
+    //when timer reaches 1:30, controller vibrates
+    if ((Brain.timer(sec) > 89.5) && (Brain.timer(sec) < 90.5) && (timerVibration == false)){
+      // "." = short rumble, "-" = long rumble, " " = pause
+      Controller1.rumble("-");
+      timerVibration = true;
+    }
 
+
+    //displays time left in game
+    Controller1.Screen.setCursor(3, 1);
+    Controller1.Screen.print(105 - Brain.timer(sec));
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
+
+  
   }
 }
 //
