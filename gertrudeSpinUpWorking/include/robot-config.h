@@ -16,7 +16,8 @@ extern motor flywheelMotorA;
 extern motor flywheelMotorB;
 extern motor_group flywheel;
 
-extern motor intakeRoller;
+extern motor intake;
+extern motor roller;
 extern motor intakeAngle;
 
 extern pneumatics poomatics;

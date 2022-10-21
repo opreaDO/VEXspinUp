@@ -21,7 +21,7 @@ motor flywheelMotorA = motor(PORT14, ratio6_1, false);
 motor flywheelMotorB = motor(PORT15, ratio6_1, true);
 motor_group flywheel = motor_group(flywheelMotorA, flywheelMotorB);
 
-motor intake = motor(PORT9, ratio18_1, false);
+motor intake = motor(PORT20, ratio18_1, false);
 motor roller = motor(PORT12, ratio36_1, false);
 // motor intakeAngle = motor(PORT11, ratio18_1, false);
 
@@ -59,6 +59,8 @@ bool intakeAngleStopped = true;
 bool drivetrainReversed = false;
 
 bool rollerSpinningDone = false;
+
+
 
 void controllerFlywheelReady() {
   flywheelVibration = true;
@@ -259,11 +261,11 @@ int rc_auto_loop_function_Controller1() {
     
       if ((opticalSensor.hue() <= 255) && (opticalSensor.hue() >= 120) && (opticalSensor.isNearObject())) {
         rollerSpinningDone = false;
-        roller.spin(forward);
+        roller.spin(reverse);
       }
       else if ((opticalSensor.hue() <= 90) && (opticalSensor.hue() >= 0) && (opticalSensor.isNearObject())) {
         if (rollerSpinningDone == false) {
-          roller.spinFor(forward, 0.5, sec);
+          roller.spinFor(reverse, 0.5, sec);
           roller.stop();
         }
         rollerSpinningDone = true;
