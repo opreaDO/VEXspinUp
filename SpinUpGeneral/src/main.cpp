@@ -17,6 +17,9 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
+bool dori = false;
+
+
 // define your global instances of motors and other devices here
 
 /*---------------------------------------------------------------------------*/
@@ -65,15 +68,27 @@ void autonomous(void) {
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
+    if (Controller1.ButtonY.pressing()) {
+      dori = true;
+    }
+    else if (Controller1.ButtonB.pressing()) {
+      dori = false;
+    }
+    
+    if (dori == false) {
+      leftMotorA.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);                 
+      leftMotorB.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);                     
+      rightMotorA.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                 
+      rightMotorB.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                  
+    }
+    else if (dori == true) {
+      leftMotorA.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);                 
+      leftMotorB.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);                       
+      rightMotorA.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                 
+      rightMotorB.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                  
+    }
+    
+  
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
