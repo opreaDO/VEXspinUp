@@ -86,6 +86,7 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -126,6 +127,7 @@ void usercontrol(void) {
     ///////////////////////////////////////// Driver Controls (End) //////////////////////////////////////
 
 
+
     ///////////////////////////////////////// Flywheel Controls (Start) ////////////////////////////////////
     if (Controller1.ButtonL2.pressing()) {
       flywheel.spin(forward, output, rpm);
@@ -133,6 +135,10 @@ void usercontrol(void) {
     else if (Controller1.ButtonL1.pressing()) {
       flywheel.stop();
     }
+    ///////////////////////////////////////// Flywheel Controls (End) //////////////////////////////////////
+
+
+
     ///////////////////////////////////////// Indexer Controls (Start) //////////////////////////////////////
     if (Controller1.ButtonX.pressing()) {
       indexer.set(true);
@@ -140,7 +146,8 @@ void usercontrol(void) {
     else {
       indexer.set(false);
     }
-    
+    ///////////////////////////////////////// Indexer Controls (End) //////////////////////////////////////
+
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
