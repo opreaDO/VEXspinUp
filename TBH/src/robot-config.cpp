@@ -24,20 +24,6 @@ optical opticalSensor = optical(PORT11);
 controller Controller1 = controller(primary);
 digital_out indexer = digital_out(Brain.ThreeWirePort.D);
 
-int rc_auto_loop_function_Controller1() {
-  // process the controller input every 20 milliseconds
-  // update the motors based on the input values
-  while(true) {
-
-    if (Controller1.ButtonX.pressing()) {
-      indexer.set(true);
-    }
-    else {
-      indexer.set(false);
-    }
-    
-  }
-}   
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
@@ -45,5 +31,5 @@ int rc_auto_loop_function_Controller1() {
  * This should be called at the start of your int main function.
  */
 void vexcodeInit(void) {
-  task rc_auto_loop_task_Controller1(rc_auto_loop_function_Controller1);
+  // Nothing to initialize
 }

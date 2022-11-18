@@ -27,7 +27,7 @@ int goal = 400;
 int prevError;
 int output;
 int tbh;
-double gain = 1;
+double gain = 0.03;
 
 bool resetEncoders = false;
 bool enableTBH = true;
@@ -46,7 +46,7 @@ int TBH() {
     if (signbit(error)!= signbit(prevError)) {  // if zero crossing,
       output = 0.5 * (output + tbh);            // then Take Back Half
       tbh = output;                             // update Take Back Half variable
-      prevError = error;                        // and save the previous error
+      prevError = error;                       // and save the previous error
       vex::task::sleep(20);                     // then wait for 20ms
     }
   }
@@ -86,7 +86,6 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -127,27 +126,14 @@ void usercontrol(void) {
     ///////////////////////////////////////// Driver Controls (End) //////////////////////////////////////
 
 
-
     ///////////////////////////////////////// Flywheel Controls (Start) ////////////////////////////////////
     if (Controller1.ButtonL2.pressing()) {
-      flywheel.spin(forward, output, rpm);
+      flywheel.spin(forward, (output / 50), volt);
     }
     else if (Controller1.ButtonL1.pressing()) {
       flywheel.stop();
     }
-    ///////////////////////////////////////// Flywheel Controls (End) //////////////////////////////////////
-
-
-
-    ///////////////////////////////////////// Indexer Controls (Start) //////////////////////////////////////
-    if (Controller1.ButtonX.pressing()) {
-      indexer.set(true);
-    }
-    else {
-      indexer.set(false);
-    }
-    ///////////////////////////////////////// Indexer Controls (End) //////////////////////////////////////
-
+    ///////////////////////////////////////// Intake Controls (End) //////////////////////////////////////
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
