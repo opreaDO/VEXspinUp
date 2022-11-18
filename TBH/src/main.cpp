@@ -46,7 +46,7 @@ int TBH() {
     if (signbit(error)!= signbit(prevError)) {  // if zero crossing,
       output = 0.5 * (output + tbh);            // then Take Back Half
       tbh = output;                             // update Take Back Half variable
-      prevError = error;                       // and save the previous error
+      prevError = error;                        // and save the previous error
       vex::task::sleep(20);                     // then wait for 20ms
     }
   }
@@ -133,7 +133,14 @@ void usercontrol(void) {
     else if (Controller1.ButtonL1.pressing()) {
       flywheel.stop();
     }
-    ///////////////////////////////////////// Intake Controls (End) //////////////////////////////////////
+    ///////////////////////////////////////// Indexer Controls (Start) //////////////////////////////////////
+    if (Controller1.ButtonX.pressing()) {
+      indexer.set(true);
+    }
+    else {
+      indexer.set(false);
+    }
+    
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
