@@ -47,7 +47,7 @@ int TBH() {
       output = 0.5 * (output + tbh);            // then Take Back Half
       tbh = output;                             // update Take Back Half variable
       prevError = error;                       // and save the previous error
-      vex::task::sleep(20);                     // then wait for 20ms
+      vex::task::sleep(10);                     // then wait for 20ms
     }
   }
   return 1;
@@ -131,11 +131,11 @@ void usercontrol(void) {
       flywheel.spin(forward, (output / 50), volt);
     }
     else if (Controller1.ButtonL1.pressing()) {
-      flywheel.stop();
+      flywheel.spin(forward, 0, volt);
     }
     ///////////////////////////////////////// Intake Controls (End) //////////////////////////////////////
 
-    wait(20, msec); // Sleep the task for a short amount of time to
+    wait(10, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
 }
