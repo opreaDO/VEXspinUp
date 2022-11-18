@@ -27,7 +27,7 @@ motor roller = motor(PORT12, ratio36_1, false);
 optical opticalSensor = optical(PORT11);
 controller Controller1 = controller(primary);
 digital_out indexer = digital_out(Brain.ThreeWirePort.D);
-digital_out expansion = digital_out(Brain.ThreeWirePort.D);
+digital_out expansion = digital_out(Brain.ThreeWirePort.A);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
