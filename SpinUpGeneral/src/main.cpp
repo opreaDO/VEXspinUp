@@ -19,6 +19,20 @@ competition Competition;
 
 bool dori = false;
 
+int autonProcess() {
+  Drivetrain.drive(reverse);
+  roller.spinFor(reverse, 0.7, sec);
+  vex::task::sleep(700);
+  Drivetrain.stop();
+  flywheel.spin(forward, 12, volt);
+  vex::task::sleep(2500);
+  indexer.set(true);
+  vex::task::sleep(1000);
+  indexer.set(false);
+
+  return 1;
+}
+
 
 // define your global instances of motors and other devices here
 
@@ -51,8 +65,7 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  Drivetrain.drive(reverse);
-  roller.spinFor(reverse, 0.7, sec);
+  vex::task TBH_(autonProcess);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -89,7 +102,7 @@ void usercontrol(void) {
     }
     
   
-    wait(20, msec); // Sleep the task for a short amount of time to
+    wait(10, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
 }
