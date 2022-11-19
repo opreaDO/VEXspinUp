@@ -27,8 +27,6 @@ int autonProcess() {
   flywheel.spin(forward, 12, volt);
   vex::task::sleep(2500);
   indexer.set(true);
-  vex::task::sleep(1000);
-  indexer.set(false);
 
   return 1;
 }
@@ -76,9 +74,11 @@ void autonomous(void) {
 /*  a VEX Competition.                                                       */
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
+/*---------------------xxsx------------------------------------------------------*/
 
 void usercontrol(void) {
+  // closing indexer after auton
+  indexer.set(false);
   // User control code here, inside the loop
   while (1) {
     if (Controller1.ButtonY.pressing()) {
