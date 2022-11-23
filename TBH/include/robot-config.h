@@ -12,5 +12,6 @@ extern motor roller;
 extern optical opticalSensor;
 extern controller Controller1;
 extern digital_out indexer;
+extern digital_out endgame;
 
 void vexcodeInit(void);

@@ -18,16 +18,17 @@ using namespace vex;
 competition Competition;
 
 // define your global instances of motors and other devices here
-
-bool revControl = false;
-
+bool intakeSpinning = false;
+bool rollerSpinning = false;
+bool flySpinning = false;
+bool driveInvert = false;
 
 int error;
 int goal = 400;
 int prevError;
-int output;
+int output = 300;
 int tbh;
-double gain = 0.03;
+double gain = 0.003;
 
 bool resetEncoders = false;
 bool enableTBH = true;
@@ -47,7 +48,7 @@ int TBH() {
       output = 0.5 * (output + tbh);            // then Take Back Half
       tbh = output;                             // update Take Back Half variable
       prevError = error;                       // and save the previous error
-      vex::task::sleep(10);                     // then wait for 20ms
+      vex::task::sleep(10);                     // then wait for 10ms
     }
   }
   return 1;
@@ -85,8 +86,54 @@ void pre_auton(void) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
-void autonomous(void) {
+void intakeToggle(void) {
+  if (intakeSpinning) {
+    intake.stop();
+  }
+  else {
+    intake.spin(forward, 12, volt);
+  }
+  intakeSpinning = !intakeSpinning;
 }
+void rollerToggle(void) {
+  if (rollerSpinning) {
+    roller.stop();
+  }
+  else {
+    roller.spin(forward, 10, volt);
+  }
+  rollerSpinning = !rollerSpinning;
+}
+void flyToggle(void) {
+  if (flySpinning) {
+    flywheel.stop();
+  }
+  else {
+    flywheel.spin(forward, output, volt);
+  }
+  flySpinning = !flySpinning;
+}
+
+void driveToggle(void) {
+  driveInvert = !driveInvert;
+}
+
+void autonomous(void) {
+  Drivetrain.drive(reverse);
+  roller.spinFor(reverse, 0.75, sec);
+  vexDelay(750);
+  Drivetrain.stop();
+  flywheel.spin(forward, 12, volt);
+  vexDelay(1000);
+  indexer.set(true);
+  vexDelay(1000);
+  indexer.set(false);
+  vexDelay(1000);
+  indexer.set(true);
+  vexDelay(1000);
+  indexer.set(false);
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -100,40 +147,58 @@ void autonomous(void) {
 
 void usercontrol(void) {
   // User control code here, inside the loop
-  while (1) {
-    Brain.Screen.drawImageFromFile("alexUN.png", 0, 0);
+  Controller1.ButtonRight.pressed(intakeToggle);
+  Controller1.ButtonY.pressed(rollerToggle);
+  Controller1.ButtonL2.pressed(flyToggle);
+  Controller1.ButtonL1.pressed(driveToggle);  
 
+
+  while (1) {
     ///////////////////////////////////////// Driver Controls (Start) ////////////////////////////////////
-    if (Controller1.ButtonY.pressing()) {
-      revControl = true;
+
+
+    if (driveInvert) {
+    leftMotorA.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                 
+    leftMotorB.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                     
+    rightMotorA.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);                 
+    rightMotorB.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);
     }
-    else if (Controller1.ButtonB.pressing()) {
-      revControl = false;
-    }
-    
-    if (revControl == false) {
-      leftMotorA.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);                 
-      leftMotorB.spin(vex::directionType::fwd, Controller1.Axis3.value(), vex::velocityUnits::pct);                     
-      rightMotorA.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                 
-      rightMotorB.spin(vex::directionType::fwd, Controller1.Axis2.value(), vex::velocityUnits::pct);                  
-    }
-    else if (revControl == true) {
-      leftMotorA.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);                 
-      leftMotorB.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);                       
-      rightMotorA.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                 
-      rightMotorB.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                  
+    else {
+      leftMotorA.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                 
+      leftMotorB.spin(vex::directionType::fwd, -(Controller1.Axis3.value()), vex::velocityUnits::pct);                       
+      rightMotorA.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);                 
+      rightMotorB.spin(vex::directionType::fwd, -(Controller1.Axis2.value()), vex::velocityUnits::pct);
     }
     ///////////////////////////////////////// Driver Controls (End) //////////////////////////////////////
-
-
+    
     ///////////////////////////////////////// Flywheel Controls (Start) ////////////////////////////////////
-    if (Controller1.ButtonL2.pressing()) {
-      flywheel.spin(forward, (output / 50), volt);
+
+    ///////////////////////////////////////// Flywheel Controls (End) //////////////////////////////////////
+
+    ///////////////////////////////////////// Intake Controls (Start) ////////////////////////////////////
+    if (Controller1.ButtonDown.pressing()){
+      intakeSpinning = true;
+      intake.spin(reverse, 12, volt);
     }
-    else if (Controller1.ButtonL1.pressing()) {
-      flywheel.spin(forward, 0, volt);
+    ///////////////////////////////////////// Intake Controls (End) ////////////////////////////////////
+
+    ///////////////////////////////////////// Roller Controls (Start) //////////////////////////////////
+    if (Controller1.ButtonB.pressing()){
+      rollerSpinning = true;
+      roller.spin(reverse, 12, volt);
     }
-    ///////////////////////////////////////// Intake Controls (End) //////////////////////////////////////
+    ///////////////////////////////////////// Roller Controls (End) ////////////////////////////////////
+
+    ////////////////////////////////////////  Indexer Controls (Start) /////////////////////////////////
+    if (Controller1.ButtonR2.pressing()) {
+      indexer.set(true);}
+    else {indexer.set(false);}
+    ///////////////////////////////////////// Indexer Controls (End) ///////////////////////////////////
+
+    ////////////////////////////////////////  Endgame Controls (Start) /////////////////////////////////
+    if (Controller1.ButtonA.pressing()) {
+      endgame.set(true);}
+    ////////////////////////////////////////  Indexer Controls (End) ///////////////////////////////////
 
     wait(10, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
